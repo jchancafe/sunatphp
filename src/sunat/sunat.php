@@ -120,20 +120,38 @@
 					{
 						$rtn["condicion"] = strip_tags(trim($matches[0][1]));
 					}
-					$busca=array(
-						"nombre_comercial" 			=> "Nombre Comercial",
-						"tipo" 						=> "Tipo Contribuyente",
-						"fecha_inscripcion" 		=> "Fecha de Inscripci&oacute;n",
-						"estado" 					=> "Estado del Contribuyente",
-						"direccion" 				=> "Direcci&oacute;n del Domicilio Fiscal",
-						"sistema_emision" 			=> "Sistema de Emisi&oacute;n de Comprobante",
-						"actividad_exterior"		=> "Actividad de Comercio Exterior",
-						"sistema_contabilidad" 		=> "Sistema de Contabilidad",
-						"oficio" 					=> "Profesi&oacute;n u Oficio",
-						"actividad_economica" 		=> "Actividad\(es\) Econ&oacute;mica\(s\)",
-						"emision_electronica" 		=> "Emisor electr&oacute;nico desde",
-						"comprobante_electronico" 	=> "Comprobantes Electr&oacute;nicos",
-						"ple" 						=> "Afiliado al PLE desde"
+
+                    // Es agente de retencion y percepcion
+                    $patron='/<option value="(.*?)"\s*>(.*?)<\/option>/';
+                    $output = preg_match_all($patron, $response, $matches, PREG_SET_ORDER);
+                    foreach ($matches as $val)
+                    {
+                        $existe = strpos($val[2], 'R&eacute;gimen de Agentes de Retenci&oacute;n de IGV');
+                        if ($existe !== false)
+                        {
+                            $rtn["agente_retencion"] = strip_tags(trim($val[2]));
+                        }
+                        $existe = strpos($val[2], 'R&eacute;gimen de Agentes de Percepci&oacute;n de IGV');
+                        if ($existe !== false)
+                        {
+                            $rtn["agente_percepcion"] = strip_tags(trim($val[2]));
+                        }
+                    }
+
+                    $busca=array(
+						"nombre_comercial" 		    	=> "Nombre Comercial",
+						"tipo" 					    	=> "Tipo Contribuyente",
+						"fecha_inscripcion"     		=> "Fecha de Inscripci&oacute;n",
+						"estado" 				    	=> "Estado del Contribuyente",
+						"direccion" 				    => "Direcci&oacute;n del Domicilio Fiscal",
+						"sistema_emision" 			    => "Sistema de Emisi&oacute;n de Comprobante",
+						"actividad_exterior"		    => "Actividad de Comercio Exterior",
+						"sistema_contabilidad" 		    => "Sistema de Contabilidad",
+						"oficio" 					    => "Profesi&oacute;n u Oficio",
+						"actividad_economica" 		    => "Actividad\(es\) Econ&oacute;mica\(s\)",
+						"emision_electronica" 		    => "Emisor electr&oacute;nico desde",
+						"comprobante_electronico" 	    => "Comprobantes Electr&oacute;nicos",
+						"ple" 						    => "Afiliado al PLE desde",
 					);
 					foreach($busca as $i=>$v)
 					{
@@ -144,6 +162,7 @@
 							$rtn[$i] = trim(utf8_encode( preg_replace( "[\s+]"," ", ($matches[0][1]) ) ) );
 						}
 					}
+
 					if( isset($rtn["comprobante_electronico"]) )
 					{
 						$nuevo = explode(',', $rtn["comprobante_electronico"]);
@@ -156,6 +175,7 @@
 							$rtn["comprobante_electronico"] = array( $rtn["comprobante_electronico"]);
 						}
 					}
+
 					// Condicion Contribuyente
 					$patron = '/<td width="(\d{2})%" colspan=1 class="bgn">Fecha de Inicio de Actividades:<\/td>\r\n[\t]*[ ]+<td class="bg" colspan=1> (.*)<\/td>/';
 					$output = preg_match_all($patron, $response, $matches, PREG_SET_ORDER);
@@ -163,7 +183,7 @@
 					{
 						$rtn["inicio_actividades"] = strip_tags(trim($matches[0][2]));
 					}
-					
+
 					// Actividad Economica
 					$patron='/<option value="00" > (.*) - (.*) <\/option>\r\n/';
 					$rpta = preg_match_all($patron, $response, $matches, PREG_SET_ORDER);
@@ -293,7 +313,6 @@
 								'activida_economica'	=> utf8_encode(trim( $value[3] ))
 							);
 						}
-					
 						return $establecimientos;
 					}
 				}
